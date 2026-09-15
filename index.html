@@ -1263,61 +1263,139 @@ function botInput(p){
    UPDATE PLAYER
    ========================================================= */
 
-function updatePlayer(p,dt){
+function updatePlayer(p, dt){
 
   if(!p.alive) return;
 
-  if(p.frozen>0){
-    p.frozen-=dt;
-    p.vx*=.9;
-    p.vy*=.9;
+  /* Status effects */
+  if(p.frozen > 0){
+    p.frozen -= dt;
     return;
   }
 
-  if(p.stunned>0){
-    p.stunned-=dt;
-    p.vx*=.94;
-    p.vy*=.94;
+  if(p.stunned > 0){
+    p.stunned -= dt;
     return;
   }
 
-  if(p.abilityCooldown>0){
-    p.abilityCooldown-=dt;
+  if(p.abilityCooldown > 0){
+    p.abilityCooldown -= dt;
   }
 
-  let input;
+  let input = {
+    x: 0,
+    y: 0,
+    ability: false
+  };
 
-  /*
-    THIS IS THE IMPORTANT PART.
-
-    Every local human player reads THEIR OWN control
-    object independently.
-
-    Therefore P1 can hold W+D while P2 holds
-    ArrowUp+ArrowLeft at the exact same time.
-  */
+  /* ==========================================
+     LOCAL HUMAN PLAYER INPUT
+     ========================================== */
 
   if(p.local && !p.bot){
 
-    input=getKeyboardInput(p);
+    const c = controls[p.slot];
 
-    /* touch controls belong to player 1 */
+    if(c){
 
-    if(p.slot===1){
+      if(pressedKeys.has(c.left))  input.x -= 1;
+      if(pressedKeys.has(c.right)) input.x += 1;
 
-      if(Math.abs(touchInput.x)>.05 ||
-         Math.abs(touchInput.y)>.05){
+      if(pressedKeys.has(c.up))    input.y -= 1;
+      if(pressedKeys.has(c.down))  input.y += 1;
 
-        input.x=touchInput.x;
-        input.y=touchInput.y;
+      if(pressedKeys.has(c.ability)){
+        input.ability = true;
+      }
+
+    }
+
+    /* Touch controls are Player 1 */
+    if(p.slot === 1){
+
+      if(Math.abs(touchInput.x) > 0.05 ||
+         Math.abs(touchInput.y) > 0.05){
+
+        input.x = touchInput.x;
+        input.y = touchInput.y;
 
       }
 
       if(touchInput.ability){
-        input.ability=true;
+        input.ability = true;
       }
 
     }
+
+  }else{
+
+    /* Bot */
+    input = botInput(p);
+
+  }
+
+  /* ==========================================
+     NORMALIZE DIAGONAL MOVEMENT
+     ========================================== */
+
+  const length = Math.hypot(input.x,input.y);
+
+  if(length > 1){
+
+    input.x /= length;
+    input.y /= length;
+
+  }
+
+  /* ==========================================
+     SPEED
+     ========================================== */
+
+  let speed = 240;
+
+  if(p.speedBuff > 0){
+
+    speed *= 1.65;
+    p.speedBuff -= dt;
+
+  }
+
+  /* ==========================================
+     ABILITY
+     ========================================== */
+
+  if(input.ability && p.abilityCooldown <= 0){
+
+    activateAbility(p);
+
+  }
+
+  /* ==========================================
+     DIRECT MOVEMENT
+     
+     This is the important fix.
+     No acceleration/friction system.
+     The player moves directly from the
+     keyboard input every frame.
+     ========================================== */
+
+  const moveX = input.x * speed * dt;
+  const moveY = input.y * speed * dt;
+
+  movePlayer(p,moveX,moveY);
+
+  /* ==========================================
+     TOUCH ONE-SHOT INPUT
+     ========================================== */
+
+  if(p.slot === 1){
+
+    touchInput.ability = false;
+    touchInput.dash = false;
+
+  }
+
+}
 
   }else{
 
