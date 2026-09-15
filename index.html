@@ -759,32 +759,36 @@ const controls = {
 
 };
 
-const blockedCodes = new Set([
-  "KeyW","KeyA","KeyS","KeyD",
-  "ArrowUp","ArrowLeft","ArrowDown","ArrowRight",
-  "KeyI","KeyJ","KeyK","KeyL",
-  "KeyT","KeyF","KeyG","KeyH",
-  "ShiftLeft","Enter","KeyU","KeyY"
-]);
-
-window.addEventListener("keydown",e=>{
-
-  if(blockedCodes.has(e.code)){
-    e.preventDefault();
-  }
+window.addEventListener("keydown",function(e){
 
   pressedKeys.add(e.code);
 
-});
+  if([
+    "ArrowUp",
+    "ArrowDown",
+    "ArrowLeft",
+    "ArrowRight",
+    "Space"
+  ].includes(e.code)){
 
-window.addEventListener("keyup",e=>{
+    e.preventDefault();
+
+  }
+
+},{passive:false});
+
+
+window.addEventListener("keyup",function(e){
 
   pressedKeys.delete(e.code);
 
 });
 
-window.addEventListener("blur",()=>{
+
+window.addEventListener("blur",function(){
+
   pressedKeys.clear();
+
 });
 
 /* =========================================================
