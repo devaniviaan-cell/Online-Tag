@@ -721,75 +721,7 @@ resize();
    P4 = TFGH
 */
 
-const pressedKeys = new Set();
-
-const controls = {
-
-  1:{
-    up:"KeyW",
-    left:"KeyA",
-    down:"KeyS",
-    right:"KeyD",
-    ability:"ShiftLeft"
-  },
-
-  2:{
-    up:"ArrowUp",
-    left:"ArrowLeft",
-    down:"ArrowDown",
-    right:"ArrowRight",
-    ability:"Enter"
-  },
-
-  3:{
-    up:"KeyI",
-    left:"KeyJ",
-    down:"KeyK",
-    right:"KeyL",
-    ability:"KeyU"
-  },
-
-  4:{
-    up:"KeyT",
-    left:"KeyF",
-    down:"KeyG",
-    right:"KeyH",
-    ability:"KeyY"
-  }
-
-};
-
-window.addEventListener("keydown",function(e){
-
-  pressedKeys.add(e.code);
-
-  if([
-    "ArrowUp",
-    "ArrowDown",
-    "ArrowLeft",
-    "ArrowRight",
-    "Space"
-  ].includes(e.code)){
-
-    e.preventDefault();
-
-  }
-
-},{passive:false});
-
-
-window.addEventListener("keyup",function(e){
-
-  pressedKeys.delete(e.code);
-
-});
-
-
-window.addEventListener("blur",function(){
-
-  pressedKeys.clear();
-
-});
+updatePlayer()
 
 /* =========================================================
    TOUCH INPUT
